@@ -68,7 +68,7 @@ export interface DrawingItem {
   descricao: string | null;
   quantidade: number;
   peso_unitario: number;
-  peso_total: number;
+  peso_total: number | null;
 }
 
 export interface Lot {
@@ -283,12 +283,12 @@ function check(error: { message: string } | null) {
 }
 
 export async function rpcStartStage(lotId: string, observacao?: string) {
-  check((await supabase.rpc("start_stage", { p_lot_id: lotId, p_observacao: observacao ?? null })).error);
+  check((await supabase.rpc("start_stage", { p_lot_id: lotId, p_observacao: observacao })).error);
 }
 
 export async function rpcCompleteStage(lotId: string, observacao?: string) {
   check(
-    (await supabase.rpc("complete_stage", { p_lot_id: lotId, p_observacao: observacao ?? null })).error,
+    (await supabase.rpc("complete_stage", { p_lot_id: lotId, p_observacao: observacao })).error,
   );
 }
 
@@ -306,7 +306,7 @@ export async function rpcSetLotItemStatus(
       await supabase.rpc("set_lot_item_status", {
         p_lot_item_id: lotItemId,
         p_status: status,
-        p_observacao: observacao ?? null,
+        p_observacao: observacao,
       })
     ).error,
   );
