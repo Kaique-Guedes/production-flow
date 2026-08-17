@@ -48,7 +48,7 @@ function Dashboard() {
     <div className="space-y-6">
       <PageHeader
         title="Dashboard de produção"
-        description="Cada lote aparece em uma única etapa. O peso é calculado a partir dos itens e nunca digitado por setor."
+        subtitle="Cada lote aparece em uma única etapa. O peso é calculado a partir dos itens e nunca digitado por setor."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -59,13 +59,13 @@ function Dashboard() {
           value={kg(pesoConcluido)}
           icon={CircleCheck}
           tone="success"
-          progress={pct(pesoConcluido, pesoTotal)}
+          hint={`${pct(pesoConcluido, pesoTotal)}% do peso cadastrado`}
         />
         <StatCard
           label="O.S. atrasadas"
           value={String(atrasadas.length)}
           icon={AlertTriangle}
-          tone={atrasadas.length ? "danger" : "muted"}
+          tone={atrasadas.length ? "destructive" : "default"}
         />
       </div>
 
@@ -86,7 +86,7 @@ function Dashboard() {
               <p className="text-xs text-muted-foreground">
                 {row.lotes} lote(s) em {ETAPA_LABEL[row.etapa].toLowerCase()}
               </p>
-              <ProgressBar value={pct(row.peso, pesoProducao)} className={ETAPA_STYLE[row.etapa].bar} />
+              <ProgressBar value={pct(row.peso, pesoProducao)} barClassName={ETAPA_STYLE[row.etapa].bar} />
             </Link>
           ))}
         </div>
