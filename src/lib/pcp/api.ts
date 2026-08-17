@@ -283,13 +283,15 @@ function check(error: { message: string } | null) {
 }
 
 export async function rpcStartStage(lotId: string, observacao?: string) {
-  check((await supabase.rpc("start_stage", { p_lot_id: lotId, p_observacao: observacao })).error);
+  const args: { p_lot_id: string; p_observacao?: string } = { p_lot_id: lotId };
+  if (observacao) args.p_observacao = observacao;
+  check((await supabase.rpc("start_stage", args)).error);
 }
 
 export async function rpcCompleteStage(lotId: string, observacao?: string) {
-  check(
-    (await supabase.rpc("complete_stage", { p_lot_id: lotId, p_observacao: observacao })).error,
-  );
+  const args: { p_lot_id: string; p_observacao?: string } = { p_lot_id: lotId };
+  if (observacao) args.p_observacao = observacao;
+  check((await supabase.rpc("complete_stage", args)).error);
 }
 
 export async function rpcReturnStage(lotId: string, justificativa: string) {
@@ -301,13 +303,11 @@ export async function rpcSetLotItemStatus(
   status: "aguardando" | "em_preparacao" | "pausado" | "concluido",
   observacao?: string,
 ) {
-  check(
-    (
-      await supabase.rpc("set_lot_item_status", {
-        p_lot_item_id: lotItemId,
-        p_status: status,
-        p_observacao: observacao,
-      })
-    ).error,
-  );
+  const args: { p_lot_item_id: string; p_status: string; p_observacao?: string } = {
+    p_lot_item_id: lotItemId,
+    p_status: status,
+  };
+  if (observacao) args.p_observacao = observacao;
+  check((await supabase.rpc("set_lot_item_status", args)).error);
 }
+
