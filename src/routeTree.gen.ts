@@ -14,7 +14,12 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticated/producao'
+import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
+import { Route as AuthenticatedLotesIdRouteImport } from './routes/_authenticated/lotes.$id'
+import { Route as AuthenticatedOrdensIndexRouteImport } from './routes/_authenticated/ordens.index'
+import { Route as AuthenticatedOrdensIdRouteImport } from './routes/_authenticated/ordens.$id'
 import { Route as AuthenticatedSetorEtapaRouteImport } from './routes/_authenticated/setor.$etapa'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,9 +46,35 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProducaoRoute = AuthenticatedProducaoRouteImport.update({
   id: '/producao',
   path: '/producao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLotesIdRoute = AuthenticatedLotesIdRouteImport.update({
+  id: '/lotes/$id',
+  path: '/lotes/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrdensIndexRoute =
+  AuthenticatedOrdensIndexRouteImport.update({
+    id: '/ordens/',
+    path: '/ordens/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrdensIdRoute = AuthenticatedOrdensIdRouteImport.update({
+  id: '/ordens/$id',
+  path: '/ordens/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSetorEtapaRoute = AuthenticatedSetorEtapaRouteImport.update({
@@ -57,16 +88,26 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
   '/producao': typeof AuthenticatedProducaoRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/lotes/$id': typeof AuthenticatedLotesIdRoute
+  '/ordens/$id': typeof AuthenticatedOrdensIdRoute
   '/setor/$etapa': typeof AuthenticatedSetorEtapaRoute
+  '/ordens/': typeof AuthenticatedOrdensIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
   '/producao': typeof AuthenticatedProducaoRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/lotes/$id': typeof AuthenticatedLotesIdRoute
+  '/ordens/$id': typeof AuthenticatedOrdensIdRoute
   '/setor/$etapa': typeof AuthenticatedSetorEtapaRoute
+  '/ordens': typeof AuthenticatedOrdensIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,15 +116,41 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/producao': typeof AuthenticatedProducaoRoute
+  '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
+  '/_authenticated/lotes/$id': typeof AuthenticatedLotesIdRoute
+  '/_authenticated/ordens/$id': typeof AuthenticatedOrdensIdRoute
   '/_authenticated/setor/$etapa': typeof AuthenticatedSetorEtapaRoute
+  '/_authenticated/ordens/': typeof AuthenticatedOrdensIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/clientes' | '/dashboard' | '/producao' | '/setor/$etapa'
+    | '/'
+    | '/auth'
+    | '/clientes'
+    | '/dashboard'
+    | '/historico'
+    | '/producao'
+    | '/usuarios'
+    | '/lotes/$id'
+    | '/ordens/$id'
+    | '/setor/$etapa'
+    | '/ordens/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/clientes' | '/dashboard' | '/producao' | '/setor/$etapa'
+  to:
+    | '/'
+    | '/auth'
+    | '/clientes'
+    | '/dashboard'
+    | '/historico'
+    | '/producao'
+    | '/usuarios'
+    | '/lotes/$id'
+    | '/ordens/$id'
+    | '/setor/$etapa'
+    | '/ordens'
   id:
     | '__root__'
     | '/'
@@ -91,8 +158,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/clientes'
     | '/_authenticated/dashboard'
+    | '/_authenticated/historico'
     | '/_authenticated/producao'
+    | '/_authenticated/usuarios'
+    | '/_authenticated/lotes/$id'
+    | '/_authenticated/ordens/$id'
     | '/_authenticated/setor/$etapa'
+    | '/_authenticated/ordens/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -138,11 +210,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/historico': {
+      id: '/_authenticated/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof AuthenticatedHistoricoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/producao': {
       id: '/_authenticated/producao'
       path: '/producao'
       fullPath: '/producao'
       preLoaderRoute: typeof AuthenticatedProducaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/usuarios': {
+      id: '/_authenticated/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lotes/$id': {
+      id: '/_authenticated/lotes/$id'
+      path: '/lotes/$id'
+      fullPath: '/lotes/$id'
+      preLoaderRoute: typeof AuthenticatedLotesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ordens/': {
+      id: '/_authenticated/ordens/'
+      path: '/ordens'
+      fullPath: '/ordens/'
+      preLoaderRoute: typeof AuthenticatedOrdensIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ordens/$id': {
+      id: '/_authenticated/ordens/$id'
+      path: '/ordens/$id'
+      fullPath: '/ordens/$id'
+      preLoaderRoute: typeof AuthenticatedOrdensIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/setor/$etapa': {
@@ -158,15 +265,25 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
+  AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
+  AuthenticatedLotesIdRoute: typeof AuthenticatedLotesIdRoute
+  AuthenticatedOrdensIdRoute: typeof AuthenticatedOrdensIdRoute
   AuthenticatedSetorEtapaRoute: typeof AuthenticatedSetorEtapaRoute
+  AuthenticatedOrdensIndexRoute: typeof AuthenticatedOrdensIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
+  AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
+  AuthenticatedLotesIdRoute: AuthenticatedLotesIdRoute,
+  AuthenticatedOrdensIdRoute: AuthenticatedOrdensIdRoute,
   AuthenticatedSetorEtapaRoute: AuthenticatedSetorEtapaRoute,
+  AuthenticatedOrdensIndexRoute: AuthenticatedOrdensIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
