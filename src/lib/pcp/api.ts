@@ -131,6 +131,13 @@ export interface HistoryEntry {
   usuario_id: string | null;
   observacao: string | null;
   created_at: string;
+  production_lots?: {
+    numero_lote: string;
+    drawings?: {
+      codigo: string;
+      work_orders?: { numero: string } | null;
+    } | null;
+  } | null;
 }
 
 export interface Profile {
@@ -197,7 +204,11 @@ export const drawingItemsQuery = (drawingId: string) =>
     queryKey: qk.drawingItems(drawingId),
     queryFn: async () =>
       unwrap<DrawingItem[]>(
-        await supabase.from("drawing_items").select("*").eq("drawing_id", drawingId).order("codigo_item"),
+        await supabase
+          .from("drawing_items")
+          .select("*")
+          .eq("drawing_id", drawingId)
+          .order("codigo_item"),
       ),
   });
 
@@ -205,9 +216,7 @@ export const lotsQuery = () =>
   queryOptions({
     queryKey: qk.lots,
     queryFn: async () =>
-      unwrap<Lot[]>(
-        await supabase.from("production_lots").select(LOT_SELECT).order("numero_lote"),
-      ),
+      unwrap<Lot[]>(await supabase.from("production_lots").select(LOT_SELECT).order("numero_lote")),
   });
 
 export const lotQuery = (id: string) =>
@@ -241,9 +250,7 @@ export const lotStagesQuery = (lotId: string) =>
   queryOptions({
     queryKey: qk.lotStages(lotId),
     queryFn: async () =>
-      unwrap<LotStage[]>(
-        await supabase.from("lot_stages").select("*").eq("lot_id", lotId),
-      ),
+      unwrap<LotStage[]>(await supabase.from("lot_stages").select("*").eq("lot_id", lotId)),
   });
 
 export const historyQuery = (lotId?: string) =>
@@ -252,7 +259,7 @@ export const historyQuery = (lotId?: string) =>
     queryFn: async () => {
       let q = supabase
         .from("lot_history")
-        .select("*")
+        .select("*, production_lots(numero_lote, drawings(codigo, work_orders(numero)))")
         .order("created_at", { ascending: false })
         .limit(lotId ? 300 : 200);
       if (lotId) q = q.eq("lot_id", lotId);
@@ -295,7 +302,9 @@ export async function rpcCompleteStage(lotId: string, observacao?: string) {
 }
 
 export async function rpcReturnStage(lotId: string, justificativa: string) {
-  check((await supabase.rpc("return_stage", { p_lot_id: lotId, p_justificativa: justificativa })).error);
+  check(
+    (await supabase.rpc("return_stage", { p_lot_id: lotId, p_justificativa: justificativa })).error,
+  );
 }
 
 export async function rpcSetLotItemStatus(
@@ -310,7 +319,6 @@ export async function rpcSetLotItemStatus(
   if (observacao) args.p_observacao = observacao;
   check((await supabase.rpc("set_lot_item_status", args)).error);
 }
-
 
 /* ------------------------------ CRUD (planejamento) ----------------------- */
 
