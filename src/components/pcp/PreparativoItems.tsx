@@ -1,32 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CircleCheck, Pause, Play } from "lucide-react";
-import { toast } from "sonner";
 
 import { StatusPill } from "@/components/pcp/StageBadge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { lotItemsQuery, qk, rpcSetLotItemStatus } from "@/lib/pcp/api";
+import { useLotActions } from "@/hooks/use-lot-actions";
+import { lotItemsQuery } from "@/lib/pcp/api";
 import { ITEM_STATUS_LABEL } from "@/lib/pcp/constants";
 import { kg, num } from "@/lib/pcp/format";
 
-type ItemStatus = "aguardando" | "em_preparacao" | "pausado" | "concluido";
-
 export function PreparativoItems({ lotId }: { lotId: string }) {
   const auth = useAuth();
-  const queryClient = useQueryClient();
   const items = useQuery(lotItemsQuery(lotId));
+  const { setItemStatus } = useLotActions();
   const canWork = auth.canWork("preparativo");
-
-  const setStatus = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: ItemStatus }) =>
-      rpcSetLotItemStatus(id, status),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: qk.lotItems(lotId) });
-      await queryClient.invalidateQueries({ queryKey: qk.lots });
-      toast.success("Item atualizado");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const rows = items.data ?? [];
   const pendentes = rows.filter((i) => i.obrigatorio && i.status !== "concluido").length;
@@ -41,12 +28,16 @@ export function PreparativoItems({ lotId }: { lotId: string }) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
           Itens do lote — apontamento individual
         </p>
         <StatusPill
-          label={pendentes === 0 ? "Itens obrigatórios concluídos" : `${pendentes} obrigatório(s) pendente(s)`}
+          label={
+            pendentes === 0
+              ? "Itens obrigatórios concluídos"
+              : `${pendentes} obrigatório(s) pendente(s)`
+          }
           tone={pendentes === 0 ? "success" : "warning"}
         />
       </div>
@@ -55,7 +46,7 @@ export function PreparativoItems({ lotId }: { lotId: string }) {
         {rows.map((item) => {
           const di = item.drawing_items;
           const pesoItem = Number(item.quantidade) * Number(di?.peso_unitario ?? 0);
-          const busy = setStatus.isPending;
+          const busy = setItemStatus.isPending;
           return (
             <div key={item.id} className="flex flex-wrap items-center gap-3 p-3">
               <div className="min-w-0 flex-1">
@@ -89,7 +80,9 @@ export function PreparativoItems({ lotId }: { lotId: string }) {
                         size="sm"
                         variant="outline"
                         disabled={!canWork || busy}
-                        onClick={() => setStatus.mutate({ id: item.id, status: "pausado" })}
+                        onClick={() =>
+                          setItemStatus.mutate({ lotItemId: item.id, status: "pausado" })
+                        }
                       >
                         <Pause className="size-4" /> Pausar
                       </Button>
@@ -98,7 +91,9 @@ export function PreparativoItems({ lotId }: { lotId: string }) {
                         size="sm"
                         variant="outline"
                         disabled={!canWork || busy}
-                        onClick={() => setStatus.mutate({ id: item.id, status: "em_preparacao" })}
+                        onClick={() =>
+                          setItemStatus.mutate({ lotItemId: item.id, status: "em_preparacao" })
+                        }
                       >
                         <Play className="size-4" /> Iniciar
                       </Button>
@@ -107,7 +102,9 @@ export function PreparativoItems({ lotId }: { lotId: string }) {
                       size="sm"
                       variant="accent"
                       disabled={!canWork || busy}
-                      onClick={() => setStatus.mutate({ id: item.id, status: "concluido" })}
+                      onClick={() =>
+                        setItemStatus.mutate({ lotItemId: item.id, status: "concluido" })
+                      }
                     >
                       <CircleCheck className="size-4" /> Concluir
                     </Button>
@@ -117,7 +114,9 @@ export function PreparativoItems({ lotId }: { lotId: string }) {
                     size="sm"
                     variant="ghost"
                     disabled={!canWork || busy}
-                    onClick={() => setStatus.mutate({ id: item.id, status: "em_preparacao" })}
+                    onClick={() =>
+                      setItemStatus.mutate({ lotItemId: item.id, status: "em_preparacao" })
+                    }
                   >
                     Reabrir
                   </Button>
