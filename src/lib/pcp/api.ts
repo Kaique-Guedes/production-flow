@@ -311,3 +311,136 @@ export async function rpcSetLotItemStatus(
   check((await supabase.rpc("set_lot_item_status", args)).error);
 }
 
+
+/* ------------------------------ CRUD (planejamento) ----------------------- */
+
+export async function createClientRow(input: { name: string; cnpj?: string; contact?: string }) {
+  check(
+    (
+      await supabase.from("clients").insert({
+        name: input.name,
+        cnpj: input.cnpj?.trim() ? input.cnpj : null,
+        contact: input.contact?.trim() ? input.contact : null,
+      })
+    ).error,
+  );
+}
+
+export async function deleteClientRow(id: string) {
+  check((await supabase.from("clients").delete().eq("id", id)).error);
+}
+
+export async function createWorkOrder(input: {
+  client_id: string;
+  numero: string;
+  pedido?: string;
+  prazo?: string;
+}) {
+  check(
+    (
+      await supabase.from("work_orders").insert({
+        client_id: input.client_id,
+        numero: input.numero,
+        pedido: input.pedido?.trim() ? input.pedido : null,
+        prazo: input.prazo?.trim() ? input.prazo : null,
+      })
+    ).error,
+  );
+}
+
+export async function updateWorkOrderStatus(id: string, status: string) {
+  check((await supabase.from("work_orders").update({ status }).eq("id", id)).error);
+}
+
+export async function createDrawing(input: {
+  work_order_id: string;
+  codigo: string;
+  descricao?: string;
+  revisao?: string;
+}) {
+  check(
+    (
+      await supabase.from("drawings").insert({
+        work_order_id: input.work_order_id,
+        codigo: input.codigo,
+        descricao: input.descricao?.trim() ? input.descricao : null,
+        revisao: input.revisao?.trim() ? input.revisao : null,
+      })
+    ).error,
+  );
+}
+
+export async function createDrawingItem(input: {
+  drawing_id: string;
+  codigo_item: string;
+  descricao?: string;
+  quantidade: number;
+  peso_unitario: number;
+}) {
+  check(
+    (
+      await supabase.from("drawing_items").insert({
+        drawing_id: input.drawing_id,
+        codigo_item: input.codigo_item,
+        descricao: input.descricao?.trim() ? input.descricao : null,
+        quantidade: input.quantidade,
+        peso_unitario: input.peso_unitario,
+      })
+    ).error,
+  );
+}
+
+export async function deleteDrawingItem(id: string) {
+  check((await supabase.from("drawing_items").delete().eq("id", id)).error);
+}
+
+/** Cria o lote e replica os itens do desenho como itens do lote (apontamento do preparativo). */
+export async function createLot(input: {
+  drawing_id: string;
+  numero_lote: string;
+  quantidade: number;
+}) {
+  const { data, error } = await supabase
+    .from("production_lots")
+    .insert({
+      drawing_id: input.drawing_id,
+      numero_lote: input.numero_lote,
+      quantidade: input.quantidade,
+    })
+    .select("id")
+    .single();
+  check(error);
+  const lotId = (data as { id: string }).id;
+
+  const items = unwrap<DrawingItem[]>(
+    await supabase.from("drawing_items").select("*").eq("drawing_id", input.drawing_id),
+  );
+  if (items.length > 0) {
+    check(
+      (
+        await supabase.from("lot_items").insert(
+          items.map((it) => ({
+            lot_id: lotId,
+            drawing_item_id: it.id,
+            quantidade: Number(it.quantidade) * input.quantidade,
+            obrigatorio: true,
+          })),
+        )
+      ).error,
+    );
+  }
+  return lotId;
+}
+
+export async function deleteLot(id: string) {
+  check((await supabase.from("lot_items").delete().eq("lot_id", id)).error);
+  check((await supabase.from("production_lots").delete().eq("id", id)).error);
+}
+
+export async function grantRole(userId: string, role: AppRole) {
+  check((await supabase.from("user_roles").insert({ user_id: userId, role })).error);
+}
+
+export async function revokeRole(roleRowId: string) {
+  check((await supabase.from("user_roles").delete().eq("id", roleRowId)).error);
+}
