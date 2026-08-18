@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticated/producao'
+import { Route as AuthenticatedSetorEtapaRouteImport } from './routes/_authenticated/setor.$etapa'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +40,25 @@ const AuthenticatedProducaoRoute = AuthenticatedProducaoRouteImport.update({
   path: '/producao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSetorEtapaRoute = AuthenticatedSetorEtapaRouteImport.update({
+  id: '/setor/$etapa',
+  path: '/setor/$etapa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/producao': typeof AuthenticatedProducaoRoute
+  '/setor/$etapa': typeof AuthenticatedSetorEtapaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/producao': typeof AuthenticatedProducaoRoute
+  '/setor/$etapa': typeof AuthenticatedSetorEtapaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/producao': typeof AuthenticatedProducaoRoute
+  '/_authenticated/setor/$etapa': typeof AuthenticatedSetorEtapaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/producao'
+  fullPaths: '/' | '/auth' | '/dashboard' | '/producao' | '/setor/$etapa'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/producao'
+  to: '/' | '/auth' | '/dashboard' | '/producao' | '/setor/$etapa'
   id:
     | '__root__'
     | '/'
@@ -72,6 +81,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/producao'
+    | '/_authenticated/setor/$etapa'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,17 +127,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProducaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/setor/$etapa': {
+      id: '/_authenticated/setor/$etapa'
+      path: '/setor/$etapa'
+      fullPath: '/setor/$etapa'
+      preLoaderRoute: typeof AuthenticatedSetorEtapaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
+  AuthenticatedSetorEtapaRoute: typeof AuthenticatedSetorEtapaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
+  AuthenticatedSetorEtapaRoute: AuthenticatedSetorEtapaRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
