@@ -5,8 +5,9 @@
   "start_url": "/dashboard",
   "scope": "/",
   "id": "/dashboard",
-  "display": "standalone",
-  "display_override": ["standalone", "fullscreen"],
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+
   "orientation": "any",
   "background_color": "#182636",
   "theme_color": "#25344a",
