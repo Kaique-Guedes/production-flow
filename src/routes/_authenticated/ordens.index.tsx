@@ -230,7 +230,3 @@ function OrdensPage() {
     </div>
   );
 }
-
-    </div>
-  );
-}
