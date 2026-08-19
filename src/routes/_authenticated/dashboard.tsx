@@ -1,10 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, CircleCheck, Layers, Scale } from "lucide-react";
+import { useState } from "react";
 
 import { EmptyState, PageHeader } from "@/components/pcp/PageHeader";
 import { StageBadge } from "@/components/pcp/StageBadge";
 import { ProgressBar, StatCard } from "@/components/pcp/StatCard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { lotsQuery, workOrdersQuery } from "@/lib/pcp/api";
 import { ETAPAS_PRODUTIVAS, ETAPA_LABEL, ETAPA_STYLE, OS_STATUS_LABEL } from "@/lib/pcp/constants";
 import { dateBR, daysLate, kg, pct } from "@/lib/pcp/format";
@@ -13,9 +21,15 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — PCP Caldeiraria" },
-      { name: "description", content: "Carga por etapa, peso total em produção e ordens de serviço em andamento." },
+      {
+        name: "description",
+        content: "Carga por etapa, peso total em produção e ordens de serviço em andamento.",
+      },
       { property: "og:title", content: "Dashboard — PCP Caldeiraria" },
-      { property: "og:description", content: "Indicadores de carga por setor e situação das ordens de serviço." },
+      {
+        property: "og:description",
+        content: "Indicadores de carga por setor e situação das ordens de serviço.",
+      },
     ],
   }),
   component: Dashboard,
@@ -24,8 +38,12 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const lots = useQuery(lotsQuery());
   const wos = useQuery(workOrdersQuery());
+  const [osFilter, setOsFilter] = useState<string>("todas");
 
-  const all = lots.data ?? [];
+  const allWos = wos.data ?? [];
+  const allLots = lots.data ?? [];
+  const all =
+    osFilter === "todas" ? allLots : allLots.filter((l) => l.drawings?.work_order_id === osFilter);
   const emProducao = all.filter((l) => l.etapa_atual !== "concluido");
   const pesoTotal = all.reduce((s, l) => s + Number(l.peso), 0);
   const pesoConcluido = all
@@ -42,14 +60,32 @@ function Dashboard() {
     };
   });
 
-  const atrasadas = (wos.data ?? []).filter((w) => w.status !== "concluida" && daysLate(w.prazo) > 0);
+  const wosFiltradas = osFilter === "todas" ? allWos : allWos.filter((w) => w.id === osFilter);
+  const atrasadas = wosFiltradas.filter((w) => w.status !== "concluida" && daysLate(w.prazo) > 0);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Dashboard de produção"
-        subtitle="Cada lote aparece em uma única etapa. O peso é calculado a partir dos itens e nunca digitado por setor."
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <PageHeader
+          title="Dashboard de produção"
+          subtitle="Cada lote aparece em uma única etapa. O peso é calculado a partir dos itens e nunca digitado por setor."
+        />
+        <div className="w-full max-w-[220px] sm:w-auto">
+          <Select value={osFilter} onValueChange={setOsFilter}>
+            <SelectTrigger aria-label="Filtrar por O.S.">
+              <SelectValue placeholder="Filtrar por O.S." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as O.S.</SelectItem>
+              {allWos.map((wo) => (
+                <SelectItem key={wo.id} value={wo.id}>
+                  O.S. {wo.numero}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Peso total cadastrado" value={kg(pesoTotal)} icon={Scale} />
@@ -86,7 +122,10 @@ function Dashboard() {
               <p className="text-xs text-muted-foreground">
                 {row.lotes} lote(s) em {ETAPA_LABEL[row.etapa].toLowerCase()}
               </p>
-              <ProgressBar value={pct(row.peso, pesoProducao)} barClassName={ETAPA_STYLE[row.etapa].bar} />
+              <ProgressBar
+                value={pct(row.peso, pesoProducao)}
+                barClassName={ETAPA_STYLE[row.etapa].bar}
+              />
             </Link>
           ))}
         </div>
@@ -101,14 +140,18 @@ function Dashboard() {
             Ver todas
           </Link>
         </div>
-        {(wos.data ?? []).length === 0 ? (
+        {wosFiltradas.length === 0 ? (
           <EmptyState
-            title="Nenhuma ordem de serviço cadastrada"
+            title={
+              osFilter === "todas"
+                ? "Nenhuma ordem de serviço cadastrada"
+                : "Nenhuma O.S. encontrada para o filtro selecionado"
+            }
             description="Cadastre um cliente e depois abra a primeira O.S. no menu Ordens de serviço."
           />
         ) : (
           <div className="panel divide-y divide-border">
-            {(wos.data ?? []).slice(0, 8).map((wo) => {
+            {wosFiltradas.slice(0, 8).map((wo) => {
               const late = daysLate(wo.prazo);
               return (
                 <Link
