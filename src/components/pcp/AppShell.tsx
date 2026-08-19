@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Sparkles,
+  Upload,
   Users,
   Wrench,
   X,
@@ -57,6 +58,7 @@ const NAV: NavItem[] = [
   },
   { to: "/clientes", label: "Clientes", icon: Users, visible: (a) => a.isPlanner },
   { to: "/historico", label: "Histórico", icon: History, visible: () => true },
+  { to: "/importar", label: "Importar planilha", icon: Upload, visible: (a) => a.isPlanner },
   { to: "/usuarios", label: "Usuários", icon: Users, visible: (a) => a.isAdmin },
 ];
 
@@ -79,7 +81,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Factory className="size-5" />
           </div>
           <div className="leading-tight">
-            <p className="font-display text-sm font-bold uppercase tracking-wider">PCP Caldeiraria</p>
+            <p className="font-display text-sm font-bold uppercase tracking-wider">
+              PCP Caldeiraria
+            </p>
             <p className="text-[11px] text-sidebar-foreground/60">Planejamento e controle</p>
           </div>
           <button
@@ -118,7 +122,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <p className="mb-3 text-[11px] text-sidebar-foreground/60">
             {auth.roles.length ? auth.roles.map((r) => ROLE_LABEL[r]).join(" · ") : "Sem função"}
           </p>
-          <Button variant="secondary" size="sm" className="w-full" onClick={() => void auth.signOut()}>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full"
+            onClick={() => void auth.signOut()}
+          >
             <LogOut className="size-4" /> Sair
           </Button>
         </div>
