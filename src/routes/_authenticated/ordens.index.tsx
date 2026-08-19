@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -153,41 +153,80 @@ function OrdensPage() {
             const progresso = pct(os.peso_concluido, os.peso_total);
             const atraso = daysLate(os.prazo);
             return (
-              <Link
-                key={os.id}
-                to="/ordens/$id"
-                params={{ id: os.id }}
-                className="flex items-center gap-4 p-4 transition-colors hover:bg-muted/50"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-display font-semibold">O.S. {os.numero}</p>
-                    <StatusPill
-                      label={OS_STATUS_LABEL[os.status] ?? os.status}
-                      tone={os.status === "concluida" ? "success" : "primary"}
-                    />
-                    {atraso > 0 && os.status !== "concluida" ? (
-                      <StatusPill label={`${atraso} dia(s) em atraso`} tone="destructive" />
-                    ) : null}
+              <div key={os.id} className="flex items-center gap-2 pr-3">
+                <Link
+                  to="/ordens/$id"
+                  params={{ id: os.id }}
+                  className="flex flex-1 items-center gap-4 p-4 transition-colors hover:bg-muted/50"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-display font-semibold">O.S. {os.numero}</p>
+                      <StatusPill
+                        label={OS_STATUS_LABEL[os.status] ?? os.status}
+                        tone={os.status === "concluida" ? "success" : "primary"}
+                      />
+                      {atraso > 0 && os.status !== "concluida" ? (
+                        <StatusPill label={`${atraso} dia(s) em atraso`} tone="destructive" />
+                      ) : null}
+                    </div>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {os.clients?.name ?? "—"} · pedido {os.pedido ?? "—"} · aberta {dateBR(os.data_abertura)}
+                      {os.prazo ? ` · prazo ${dateBR(os.prazo)}` : ""}
+                    </p>
+                    <div className="mt-2 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-muted">
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${progresso}%` }} />
+                    </div>
                   </div>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {os.clients?.name ?? "—"} · pedido {os.pedido ?? "—"} · aberta {dateBR(os.data_abertura)}
-                    {os.prazo ? ` · prazo ${dateBR(os.prazo)}` : ""}
-                  </p>
-                  <div className="mt-2 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${progresso}%` }} />
+                  <div className="text-right">
+                    <p className="text-sm font-semibold tabular">{kg(os.peso_concluido)}</p>
+                    <p className="text-[11px] text-muted-foreground tabular">de {kg(os.peso_total)}</p>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold tabular">{kg(os.peso_concluido)}</p>
-                  <p className="text-[11px] text-muted-foreground tabular">de {kg(os.peso_total)}</p>
-                </div>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-              </Link>
+                  <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                </Link>
+                {auth.isPlanner ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEdit({ id: os.id, numero: os.numero })}
+                    aria-label={`Editar número da O.S. ${os.numero}`}
+                  >
+                    <Pencil className="size-4" />
+                  </Button>
+                ) : null}
+              </div>
             );
           })}
         </div>
       )}
+
+      <Dialog open={edit !== null} onOpenChange={(o) => !o && setEdit(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar número da O.S.</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="os-edit-num">Número da O.S. *</Label>
+            <Input
+              id="os-edit-num"
+              value={edit?.numero ?? ""}
+              onChange={(e) => setEdit((p) => (p ? { ...p, numero: e.target.value } : p))}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEdit(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="accent"
+              disabled={!edit || edit.numero.trim().length < 1 || rename.isPending}
+              onClick={() => rename.mutate()}
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

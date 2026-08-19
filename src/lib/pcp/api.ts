@@ -364,6 +364,11 @@ export async function updateWorkOrderStatus(id: string, status: string) {
   check((await supabase.from("work_orders").update({ status }).eq("id", id)).error);
 }
 
+export async function updateWorkOrderNumero(id: string, numero: string) {
+  check((await supabase.from("work_orders").update({ numero: numero.trim() }).eq("id", id)).error);
+}
+
+
 export async function createDrawing(input: {
   work_order_id: string;
   codigo: string;
