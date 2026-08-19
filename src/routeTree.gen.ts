@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
+import { Route as AuthenticatedImportarRouteImport } from './routes/_authenticated/importar'
 import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticated/producao'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedLotesIdRouteImport } from './routes/_authenticated/lotes.$id'
@@ -49,6 +50,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
   id: '/historico',
   path: '/historico',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedImportarRoute = AuthenticatedImportarRouteImport.update({
+  id: '/importar',
+  path: '/importar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProducaoRoute = AuthenticatedProducaoRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/historico': typeof AuthenticatedHistoricoRoute
+  '/importar': typeof AuthenticatedImportarRoute
   '/producao': typeof AuthenticatedProducaoRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/lotes/$id': typeof AuthenticatedLotesIdRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/historico': typeof AuthenticatedHistoricoRoute
+  '/importar': typeof AuthenticatedImportarRoute
   '/producao': typeof AuthenticatedProducaoRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/lotes/$id': typeof AuthenticatedLotesIdRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
+  '/_authenticated/importar': typeof AuthenticatedImportarRoute
   '/_authenticated/producao': typeof AuthenticatedProducaoRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/lotes/$id': typeof AuthenticatedLotesIdRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/dashboard'
     | '/historico'
+    | '/importar'
     | '/producao'
     | '/usuarios'
     | '/lotes/$id'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/dashboard'
     | '/historico'
+    | '/importar'
     | '/producao'
     | '/usuarios'
     | '/lotes/$id'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes'
     | '/_authenticated/dashboard'
     | '/_authenticated/historico'
+    | '/_authenticated/importar'
     | '/_authenticated/producao'
     | '/_authenticated/usuarios'
     | '/_authenticated/lotes/$id'
@@ -217,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHistoricoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/importar': {
+      id: '/_authenticated/importar'
+      path: '/importar'
+      fullPath: '/importar'
+      preLoaderRoute: typeof AuthenticatedImportarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/producao': {
       id: '/_authenticated/producao'
       path: '/producao'
@@ -266,6 +285,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
+  AuthenticatedImportarRoute: typeof AuthenticatedImportarRoute
   AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedLotesIdRoute: typeof AuthenticatedLotesIdRoute
@@ -278,6 +298,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
+  AuthenticatedImportarRoute: AuthenticatedImportarRoute,
   AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedLotesIdRoute: AuthenticatedLotesIdRoute,
