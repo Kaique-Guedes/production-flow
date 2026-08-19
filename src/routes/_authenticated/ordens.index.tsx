@@ -25,7 +25,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
-import { clientsQuery, createWorkOrder, qk, workOrdersQuery } from "@/lib/pcp/api";
+import {
+  clientsQuery,
+  createWorkOrder,
+  qk,
+  updateWorkOrderNumero,
+  workOrdersQuery,
+} from "@/lib/pcp/api";
 import { OS_STATUS_LABEL } from "@/lib/pcp/constants";
 import { dateBR, daysLate, kg, pct } from "@/lib/pcp/format";
 
@@ -35,7 +41,8 @@ export const Route = createFileRoute("/_authenticated/ordens/")({
       { title: "Ordens de serviço — PCP Caldeiraria" },
       {
         name: "description",
-        content: "Lista de ordens de serviço com peso total, peso concluído, prazo e avanço da produção.",
+        content:
+          "Lista de ordens de serviço com peso total, peso concluído, prazo e avanço da produção.",
       },
       { property: "og:title", content: "Ordens de serviço — PCP Caldeiraria" },
       { property: "og:description", content: "Acompanhe prazos e avanço em peso de cada O.S." },
@@ -51,6 +58,7 @@ function OrdensPage() {
   const clients = useQuery(clientsQuery());
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ client_id: "", numero: "", pedido: "", prazo: "" });
+  const [edit, setEdit] = useState<{ id: string; numero: string } | null>(null);
 
   const create = useMutation({
     mutationFn: () => createWorkOrder(form),
@@ -59,6 +67,19 @@ function OrdensPage() {
       setForm({ client_id: "", numero: "", pedido: "", prazo: "" });
       setOpen(false);
       toast.success("O.S. aberta");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const rename = useMutation({
+    mutationFn: () => {
+      if (!edit) throw new Error("Nenhuma O.S. selecionada");
+      return updateWorkOrderNumero(edit.id, edit.numero.trim());
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: qk.workOrders });
+      setEdit(null);
+      toast.success("Número da O.S. atualizado");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -171,16 +192,22 @@ function OrdensPage() {
                       ) : null}
                     </div>
                     <p className="truncate text-xs text-muted-foreground">
-                      {os.clients?.name ?? "—"} · pedido {os.pedido ?? "—"} · aberta {dateBR(os.data_abertura)}
+                      {os.clients?.name ?? "—"} · pedido {os.pedido ?? "—"} · aberta{" "}
+                      {dateBR(os.data_abertura)}
                       {os.prazo ? ` · prazo ${dateBR(os.prazo)}` : ""}
                     </p>
                     <div className="mt-2 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${progresso}%` }} />
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${progresso}%` }}
+                      />
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold tabular">{kg(os.peso_concluido)}</p>
-                    <p className="text-[11px] text-muted-foreground tabular">de {kg(os.peso_total)}</p>
+                    <p className="text-[11px] text-muted-foreground tabular">
+                      de {kg(os.peso_total)}
+                    </p>
                   </div>
                   <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
                 </Link>
