@@ -323,15 +323,17 @@ export async function rpcSetLotItemStatus(
 /* ------------------------------ CRUD (planejamento) ----------------------- */
 
 export async function createClientRow(input: { name: string; cnpj?: string; contact?: string }) {
-  check(
-    (
-      await supabase.from("clients").insert({
-        name: input.name,
-        cnpj: input.cnpj?.trim() ? input.cnpj : null,
-        contact: input.contact?.trim() ? input.contact : null,
-      })
-    ).error,
-  );
+  const { data, error } = await supabase
+    .from("clients")
+    .insert({
+      name: input.name,
+      cnpj: input.cnpj?.trim() ? input.cnpj : null,
+      contact: input.contact?.trim() ? input.contact : null,
+    })
+    .select("id")
+    .single();
+  check(error);
+  return (data as { id: string }).id;
 }
 
 export async function deleteClientRow(id: string) {
@@ -344,16 +346,18 @@ export async function createWorkOrder(input: {
   pedido?: string;
   prazo?: string;
 }) {
-  check(
-    (
-      await supabase.from("work_orders").insert({
-        client_id: input.client_id,
-        numero: input.numero,
-        pedido: input.pedido?.trim() ? input.pedido : null,
-        prazo: input.prazo?.trim() ? input.prazo : null,
-      })
-    ).error,
-  );
+  const { data, error } = await supabase
+    .from("work_orders")
+    .insert({
+      client_id: input.client_id,
+      numero: input.numero,
+      pedido: input.pedido?.trim() ? input.pedido : null,
+      prazo: input.prazo?.trim() ? input.prazo : null,
+    })
+    .select("id")
+    .single();
+  check(error);
+  return (data as { id: string }).id;
 }
 
 export async function updateWorkOrderStatus(id: string, status: string) {
@@ -366,16 +370,18 @@ export async function createDrawing(input: {
   descricao?: string;
   revisao?: string;
 }) {
-  check(
-    (
-      await supabase.from("drawings").insert({
-        work_order_id: input.work_order_id,
-        codigo: input.codigo,
-        descricao: input.descricao?.trim() ? input.descricao : null,
-        revisao: input.revisao?.trim() ? input.revisao : null,
-      })
-    ).error,
-  );
+  const { data, error } = await supabase
+    .from("drawings")
+    .insert({
+      work_order_id: input.work_order_id,
+      codigo: input.codigo,
+      descricao: input.descricao?.trim() ? input.descricao : null,
+      revisao: input.revisao?.trim() ? input.revisao : null,
+    })
+    .select("id")
+    .single();
+  check(error);
+  return (data as { id: string }).id;
 }
 
 export async function createDrawingItem(input: {
@@ -394,6 +400,27 @@ export async function createDrawingItem(input: {
         quantidade: input.quantidade,
         peso_unitario: input.peso_unitario,
       })
+    ).error,
+  );
+}
+
+/** Insere vários itens do desenho de uma vez (usado pela importação de planilha). */
+export async function createDrawingItemsBulk(
+  drawingId: string,
+  items: { codigo_item: string; descricao?: string; quantidade: number; peso_unitario: number }[],
+) {
+  if (items.length === 0) return;
+  check(
+    (
+      await supabase.from("drawing_items").insert(
+        items.map((it) => ({
+          drawing_id: drawingId,
+          codigo_item: it.codigo_item,
+          descricao: it.descricao?.trim() ? it.descricao : null,
+          quantidade: it.quantidade,
+          peso_unitario: it.peso_unitario,
+        })),
+      )
     ).error,
   );
 }
